@@ -27,6 +27,19 @@ const storage = multer.diskStorage({
       cb(null, file.originalname)  // use the original file name
     }
   });
+
+function formatDate(dateString) {
+    const months = {
+        'Jan.': '01', 'Feb.': '02', 'Mar.': '03', 'Apr.': '04',
+        'May': '05', 'Jun.': '06', 'Jul.': '07', 'Aug.': '08',
+        'Sep.': '09', 'Oct.': '10', 'Nov.': '11', 'Dec.': '12'
+    };
+    const parts = dateString.split(' ');
+    const day = parts[0];
+    const month = months[parts[1]];
+    const year = parts[2];
+    return `${day}/${month}/${year}`;
+}
   
 const upload = multer({ storage: storage });
 
@@ -67,16 +80,16 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     lines.forEach(line => {
         if (line.startsWith('บัตรประจำตัวประชาชน')) {
             idInfo.identification_number = lines[lines.indexOf(line) + 1].trim();
-        } else if (line.includes('Name')) {
+        } else if (line.toLowerCase().includes('Name'.toLowerCase())) {
             idInfo.name = line.split('Name')[1].trim();
-        } else if (line.includes('Last name')) {
+        } else if (line.toLowerCase().includes('Last name'.toLowerCase())) {
             idInfo.last_name = line.split('Last name')[1].trim();
-        } else if (line.includes('Date of Birth')) {
-            idInfo.date_of_birth = line.split('Date of Birth')[1].trim();
-        } else if (line.includes('Date of Issue')) {
-            idInfo.date_of_issue = lines[lines.indexOf(line) - 1].trim();
-        } else if (line.includes('Date of Expiry')) {
-            idInfo.date_of_expiry = lines[lines.indexOf(line) - 1].trim();
+        } else if (line.toLowerCase().includes('Date of Birth'.toLowerCase())) {
+            idInfo.date_of_birth = formatDate(line.split('Date of Birth')[1].trim());
+        } else if (line.toLowerCase().includes('Date of Issue'.toLowerCase())) {
+            idInfo.date_of_issue = formatDate(lines[lines.indexOf(line) - 1].trim());
+        } else if (line.toLowerCase().includes('Date of Expiry'.toLowerCase())) {
+            idInfo.date_of_expiry = formatDate(lines[lines.indexOf(line) - 1].trim());
         }
     });
 
