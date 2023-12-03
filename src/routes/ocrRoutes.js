@@ -15,6 +15,9 @@ const storage = multer.diskStorage({
   
 const upload = multer({ storage: storage });
 
-router.post('/ocr', upload.single('image'), ocrController.processOCR);
+router.post('/ocr', upload.single('image'), ocrController.createOCR);
+router.get('/ocr/:id', ocrController.getOCRResult);
+router.put('/ocr/:id', ocrController.updateOCRResult);
+router.delete('/ocr/:id', ocrController.deleteOCRResult);
 
 module.exports = router;
