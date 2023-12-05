@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ocrController = require('../controllers/ocrController');
+const {getOCRResult, createOCR, updateOCRResult, deleteOCRResult} = require('../controllers/ocrController');
 const multer = require('multer');
 
 // Set up Multer
@@ -15,9 +15,9 @@ const storage = multer.diskStorage({
   
 const upload = multer({ storage: storage });
 
-router.post('/ocr', upload.single('image'), ocrController.createOCR);
-router.get('/ocr/:id', ocrController.getOCRResult);
-router.put('/ocr/:id', ocrController.updateOCRResult);
-router.delete('/ocr/:id', ocrController.deleteOCRResult);
+router.post('/ocr', upload.single('image'), createOCR);
+router.get('/ocr/:id', getOCRResult);
+router.put('/ocr/:id', updateOCRResult);
+router.delete('/ocr/:id', deleteOCRResult);
 
 module.exports = router;
