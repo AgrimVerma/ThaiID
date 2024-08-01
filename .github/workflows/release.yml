@@ -1,37 +1,49 @@
-name: Create Release
-
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - master
+    branches: [ master, add/gh-action-prod ]
 
+name: Deploy Production CGK
 jobs:
-  create_release:
-    runs-on: ubuntu-latest
-
+  build:
+    name: Build
+    runs-on: [self-hosted, eks-runner]
+    outputs:
+      image_registry: ${{ steps.publish_image.outputs.image_registry }}
+      image_tag: ${{ steps.vars.outputs.sha_short }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release ${{ github.run_number }}
-        body: |
-          This release includes the following changes:
-        draft: false
-        prerelease: false
+      - name: Create Version Tagging 
+        id: version
+        uses: codacy/git-version@2.4.0
+        with:
+          prefix: "v"
+      
+      - name : Use the Version
+        run: |
+          echo ${{ steps.version.outputs.version }}
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./path/to/your/asset.zip
-        asset_name: your-asset.zip
-        asset_content_type: application/zip
+      - name: Use the previous version
+        run: |
+          echo ${{ steps.version.outputs.previous-version }}
+
+      - name: Push Tagging
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: 'refs/tags/${{ steps.version.outputs.version }}',
+            sha: context.sha
+            })
+      
+      - name: Checkout
+        uses: actions/checkout@v2
