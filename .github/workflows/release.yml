@@ -33,17 +33,6 @@ jobs:
         run: |
           echo ${{ steps.version.outputs.previous-version }}
 
-      - name: Push Tagging
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: 'refs/tags/${{ steps.version.outputs.version }}',
-            sha: context.sha
-            })
-      
+
       - name: Checkout
         uses: actions/checkout@v2
