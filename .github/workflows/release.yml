@@ -7,7 +7,7 @@ name: Deploy Production CGK
 jobs:
   build:
     name: Build
-    runs-on: [self-hosted, eks-runner]
+    runs-on: ubuntu-latest
     outputs:
       image_registry: ${{ steps.publish_image.outputs.image_registry }}
       image_tag: ${{ steps.vars.outputs.sha_short }}
